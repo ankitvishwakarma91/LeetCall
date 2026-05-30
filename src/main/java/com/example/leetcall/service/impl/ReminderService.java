@@ -6,15 +6,19 @@ import com.example.leetcall.entity.Reminder;
 import com.example.leetcall.repository.ReminderRepository;
 import com.example.leetcall.service.LeetcodeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ReminderService{
+@Slf4j
+public class ReminderService {
 
     private final ReminderRepository reminderRepository;
     private final CallService callService;
@@ -24,38 +28,69 @@ public class ReminderService{
         Reminder reminder = new Reminder();
         reminder.setUsername(username);
         reminder.setLeetcodeUsername(request.getLeetcodeUsername());
-        reminder.setProblemName(request.getProblemName());
         reminder.setPhoneNumber(request.getPhoneNumber());
         reminder.setRemindAt(request.getRemindAt());
-        reminder.setStatus(ReminderStatus.PENDING);
+        reminder.setTimeZone(request.getTimeZone());
+        reminder.setActive(true);
 
         return reminderRepository.save(reminder);
     }
 
     @Scheduled(fixedRate = 60000)
     public void processDueReminders() {
-        List<Reminder> dueReminders = reminderRepository
-                .findByStatusAndRemindAtBefore(ReminderStatus.PENDING, LocalDateTime.now());
+        List<Reminder> activeReminder = reminderRepository.findByActiveTrue();
 
-        for (Reminder reminder : dueReminders) {
+        log.info("Scheduler fired. Active reminders found: {}", activeReminder.size());
+
+        for (Reminder reminder : activeReminder) {
+
+            ZoneId zone = ZoneId.of(reminder.getTimeZone());
+            LocalTime nowInUserZone = LocalTime.now(zone);
+
+            log.info("User: {} | Now: {} | RemindAt: {}",
+                    reminder.getUsername(),
+                    nowInUserZone,
+                    reminder.getRemindAt());
+
+            if (!isDueNow(reminder)) {
+                log.info("Not due yet for user: {}", reminder.getLeetcodeUsername());
+                continue;
+            }
+
+            log.info("Due now! Checking LeetCode for user: {}", reminder.getLeetcodeUsername());
+
             try {
-                boolean alreadySolved = leetCodeService.hasAcceptedToday(
+                boolean alreadySolved = leetCodeService.hasSubmittedToday(
                         reminder.getLeetcodeUsername(),
-                        reminder.getProblemName()
+                        reminder.getTimeZone()
                 );
 
-                if (alreadySolved) {
-                    reminder.setStatus(ReminderStatus.SOLVED);
+                log.info("Has submitted today: {}", alreadySolved);
+
+
+                if (!alreadySolved) {
+                    log.info("No submission found — initiating call to: {}", reminder.getPhoneNumber());
+                    callService.makeCall(reminder.getPhoneNumber());
+                    log.info("Call initiated successfully.");
                 } else {
-                    callService.makeCall(reminder.getPhoneNumber(), reminder.getProblemName());
-                    reminder.setStatus(ReminderStatus.CALLED);
+                    log.info("Already submitted today - no call needed");
                 }
 
             } catch (Exception e) {
-                reminder.setStatus(ReminderStatus.FAILED);
+                log.error("Failed for user: {} → {}", reminder.getUsername(), e.getMessage());
             }
 
             reminderRepository.save(reminder);
         }
     }
+
+    private boolean isDueNow(Reminder reminder) {
+        ZoneId zone = ZoneId.of(reminder.getTimeZone());
+        LocalTime localTime = LocalTime.now(zone);
+
+        return
+                localTime.getHour() == reminder.getRemindAt().getHour()
+                        && localTime.getMinute() == reminder.getRemindAt().getMinute();
+    }
+
 }

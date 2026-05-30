@@ -8,5 +8,5 @@ public interface LeetcodeService {
 
     public List<LeetcodeSubmission> getRecentSubmission(String leetcodeUsername);
 
-    public boolean hasAcceptedToday(String leetcodeUsername , String problemTitle);
+    public boolean hasSubmittedToday(String leetcodeUsername , String timeZone);
 }

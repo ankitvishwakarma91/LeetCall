@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Data
 @Entity
@@ -17,12 +18,14 @@ public class Reminder {
 
     private String username;
     private String leetcodeUsername;    //  LeetCode username
-    private String problemName;
     private String phoneNumber;
-    private LocalDateTime remindAt;
+    private LocalTime remindAt;
+    private String timeZone;
 
-    @Enumerated(EnumType.STRING)
-    private ReminderStatus status = ReminderStatus.PENDING;
+    private boolean active = true; // for reminder to check is active or not ?
+
+//    @Enumerated(EnumType.STRING)
+//    private ReminderStatus status = ReminderStatus.PENDING;
 
 
 }

@@ -24,7 +24,7 @@ public class ReminderController {
     public ResponseEntity<Reminder> schedule(@RequestBody @Valid ReminderRequest request,
                                              Authentication authentication) {
         Reminder reminder = reminderService.scheduleReminder(
-                authentication.getName(),
+                request.getLeetcodeUsername(),
                 request
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(reminder);

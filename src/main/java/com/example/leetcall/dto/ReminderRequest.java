@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 
 @Data
@@ -15,13 +16,12 @@ public class ReminderRequest {
     private String leetcodeUsername;
 
     @NotBlank
-    private String problemName;
-
-    @NotBlank
     private String phoneNumber;
 
     @NotNull
-    private LocalDateTime remindAt;
+    private LocalTime remindAt;
 
+    @NotNull
+    private String timeZone;
 
 }

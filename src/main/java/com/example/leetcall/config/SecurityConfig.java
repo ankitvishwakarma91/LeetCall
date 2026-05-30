@@ -54,7 +54,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/auth/v1/register",
-                                "/auth/v1/login"
+                                "/auth/v1/login",
+                                "/api/reminder/schedule",
+                                "/api/test/test-call"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

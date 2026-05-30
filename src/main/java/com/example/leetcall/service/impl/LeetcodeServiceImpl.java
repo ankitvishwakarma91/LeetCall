@@ -66,21 +66,21 @@ public class LeetcodeServiceImpl implements LeetcodeService {
     }
 
     @Override
-    public boolean hasAcceptedToday(String leetcodeUsername, String problemTitle) {
+    public boolean hasSubmittedToday(String leetcodeUsername, String timeZone) {
 
         List<LeetcodeSubmission> submissions = getRecentSubmission(leetcodeUsername);
 
-        LocalDate today = LocalDate.now();
+        ZoneId userTimeZone = ZoneId.of(timeZone);
+        LocalDate todayInUserTimeZone = LocalDate.now(userTimeZone);
 
         return submissions.stream()
-                .filter(s -> s.getTitle().equalsIgnoreCase(problemTitle))
                 .filter(s -> s.getStatusDisplay().equalsIgnoreCase("Accepted"))
                 .anyMatch(s -> {
                     long epoch = Long.parseLong(s.getTimestamp());
                     LocalDate submissionDate = Instant.ofEpochSecond(epoch)
-                            .atZone(ZoneId.systemDefault())
+                            .atZone(userTimeZone)
                             .toLocalDate();
-                    return submissionDate.equals(today);
+                    return submissionDate.equals(todayInUserTimeZone);
                 });
     }
 }

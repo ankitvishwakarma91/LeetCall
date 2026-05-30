@@ -11,5 +11,5 @@ import java.util.List;
 @Repository
 public interface ReminderRepository extends JpaRepository<Reminder, Long> {
 
-    List<Reminder> findByStatusAndRemindAtBefore(ReminderStatus status, LocalDateTime time);
+    List<Reminder> findByActiveTrue();
 }
