@@ -5,7 +5,7 @@ import com.example.leetcall.dto.RegisterDto;
 import com.example.leetcall.dto.UserDto;
 import com.example.leetcall.entity.User;
 import com.example.leetcall.repository.UserRepository;
-import com.example.leetcall.service.UserService;
+import com.example.leetcall.service.AuthService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class UserServiceImpl implements UserService {
+public class AuthServiceImp implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -23,9 +23,9 @@ public class UserServiceImpl implements UserService {
 
     private final AuthenticationManager authenticationManager;
 
-    private UserServiceImpl(UserRepository userRepository,
-                            PasswordEncoder passwordEncoder,
-                            AuthenticationManager authenticationManager) {
+    private AuthServiceImp(UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;

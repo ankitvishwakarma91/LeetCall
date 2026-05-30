@@ -5,7 +5,7 @@ import com.example.leetcall.dto.LoginDto;
 import com.example.leetcall.dto.RegisterDto;
 import com.example.leetcall.dto.UserDto;
 
-public interface UserService {
+public interface AuthService {
 
 
     public UserDto createUser(RegisterDto user);
